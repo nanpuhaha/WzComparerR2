@@ -134,7 +134,7 @@ steps:
   continueOnError: true
   displayName: Delete last build
   inputs:
-    gitHubConnection: 'Kagamia'
+    gitHubConnection: 'nanpuhaha'
     repositoryName: '$(Build.Repository.Name)'
     action: 'delete'
     tag: 'ci-build'
@@ -150,7 +150,7 @@ steps:
 - task: GitHubRelease@1
   condition: and(succeeded(), eq(variables.isMain, true))
   inputs:
-    gitHubConnection: 'Kagamia'
+    gitHubConnection: 'nanpuhaha'
     repositoryName: '$(Build.Repository.Name)'
     action: 'edit'
     target: '$(Build.SourceVersion)'
