@@ -5,6 +5,7 @@
 
 trigger:
 - master
+- ms-support
 
 pool:
   vmImage: 'windows-latest'
