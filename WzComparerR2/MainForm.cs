@@ -369,6 +369,17 @@ namespace WzComparerR2
                     aniItem.SelectedAnimationName = aniName;
                     this.cmbItemAniNames.Tooltip = aniName;
                 }
+                else if (this.pictureBoxEx1.Items[0] is FrameAnimator frameAni && this.cmbItemAniNames.SelectedItem is int selectedpage)
+                {
+                    if (frameAni.Data.Frames.Count == 1)
+                    {
+                        var png = frameAni.Data.Frames[0].Png;
+                        if (png != null && png.ActualPages > 1 && 0 <= selectedpage && selectedpage < png.ActualPages)
+                        {
+                            this.pictureBoxEx1.ShowImage(png, selectedpage);
+                        }
+                    }
+                }
             }
         }
 
@@ -574,7 +585,8 @@ namespace WzComparerR2
             if (frame.Png != null)
             {
                 var config = ImageHandlerConfig.Default;
-                string pngFileName = pictureBoxEx1.PictureName + ".png";
+                int page = frame.Page;
+                string pngFileName = pictureBoxEx1.PictureName + (frame.Png.ActualPages > 1 ? $".{page}" : null) + ".png";
 
                 if (config.AutoSaveEnabled)
                 {
@@ -593,7 +605,7 @@ namespace WzComparerR2
                     pngFileName = dlg.FileName;
                 }
 
-                using (var bmp = frame.Png.ExtractPng())
+                using (var bmp = frame.Png.ExtractPng(page))
                 {
                     bmp.Save(pngFileName, System.Drawing.Imaging.ImageFormat.Png);
                 }
@@ -1069,7 +1081,7 @@ namespace WzComparerR2
             switch (value)
             {
                 case Wz_Png png:
-                    return $"png {png.Width}*{png.Height} ({png.Form})";
+                    return $"png {png.Width}*{png.Height} ({(int)png.Format}{(png.Scale > 0 ? $", {png.Scale}" : null)})";
 
                 case Wz_Vector vector:
                     return $"({vector.X}, {vector.Y})";
@@ -1144,11 +1156,19 @@ namespace WzComparerR2
                     pictureBoxEx1.PictureName = GetSelectedNodeImageName();
                     pictureBoxEx1.ShowImage(png);
                     this.cmbItemAniNames.Items.Clear();
+                    if (png.ActualPages > 1)
+                    {
+                        for (int i = 0; i < png.ActualPages; i++)
+                            this.cmbItemAniNames.Items.Add(i);
+                    }
+
                     advTree3.PathSeparator = ".";
                     textBoxX1.Text = "dataLength: " + png.DataLength + " bytes\r\n" +
                         "offset: " + png.Offset + "\r\n" +
                         "size: " + png.Width + "*" + png.Height + "\r\n" +
-                        "png format: " + png.Form;
+                        "png format: " + png.Format + "(" + (int)png.Format + ")\r\n" +
+                        "scale: " + png.Scale + "(x" + png.ActualScale + ")\r\n" +
+                        "pages: " + png.Pages + "(" + png.ActualPages + ")";
                     break;
 
                 case Wz_Vector vector:
@@ -1225,9 +1245,11 @@ namespace WzComparerR2
                                         this.cmbItemAniNames.Items.Clear();
                                         advTree3.PathSeparator = ".";
                                         textBoxX1.AppendText("\r\n\r\ndataLength: " + png.DataLength + " bytes\r\n" +
-                                        "offset: " + png.Offset + "\r\n" +
-                                        "size: " + png.Width + "*" + png.Height + "\r\n" +
-                                            "png format: " + png.Form);
+                                            "offset: " + png.Offset + "\r\n" +
+                                            "size: " + png.Width + "*" + png.Height + "\r\n" +
+                                            "png format: " + png.Format + "(" + (int)png.Format + ")\r\n" +
+                                            "scale: " + png.Scale + "(x" + png.ActualScale + ")\r\n" +
+                                            "pages: " + png.Pages + "(" + png.ActualPages + ")");
                                     }
                                 }
                             }
@@ -1784,6 +1806,9 @@ namespace WzComparerR2
                 case 2:
                     searchAdvTree(advTree3, 1, textBoxItemSearchWz.Text, checkBoxItemExact1.Checked, checkBoxItemRegex1.Checked);
                     break;
+                case 3: //full path
+                    searchAdvTreeFullPath(textBoxItemSearchWz.Text);
+                    break;
             }
         }
 
@@ -1834,6 +1859,82 @@ namespace WzComparerR2
             }
             
             return null;
+        }
+
+        private void searchAdvTreeFullPath(string fullPath)
+        {
+            string[] pathSegments = fullPath.Split('/');
+
+            bool isNodePathMatches(string pathSegment, string nodeName, StringComparison stringComparison)
+            {
+                if (string.Equals(pathSegment, nodeName, stringComparison))
+                {
+                    return true;
+                }
+                int pathExtIndex = pathSegment.LastIndexOf('.');
+                int nodeExtIndex = nodeName.LastIndexOf(".");
+                if (pathExtIndex != -1 || nodeExtIndex != -1)
+                {
+                    ReadOnlySpan<char> pathWithoutExt = pathExtIndex == -1 ? pathSegment.AsSpan() : pathSegment.AsSpan(0, pathExtIndex);
+                    ReadOnlySpan<char> nodeWithoutExt = nodeExtIndex == -1 ? nodeName.AsSpan() : nodeName.AsSpan(0, nodeExtIndex);
+                    return pathWithoutExt.Equals(nodeWithoutExt, stringComparison);
+                }
+                return false;
+            }
+
+            IEnumerable<(Node result, int resultPathLevel)> searchNode(Node treeNode, int pathLevel)
+            {
+                string pathSegment = pathSegments[pathLevel];
+                if (isNodePathMatches(pathSegment, treeNode.Text, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (treeNode.Nodes.Count == 0 || pathLevel == pathSegments.Length - 1)
+                    {
+                        yield return (treeNode, pathLevel);
+                    }
+                    foreach (Node childNode in treeNode.Nodes)
+                    {
+                        foreach (var resultTuple in searchNode(childNode, pathLevel + 1))
+                        {
+                            yield return resultTuple;
+                        }
+                    }
+                }
+            }
+
+            foreach (var node in findNextNode(this.advTree1))
+            {
+                foreach ((Node result, int resultPathLevel) in searchNode(node, 0))
+                {
+                    if (resultPathLevel == pathSegments.Length - 1)
+                    {
+                        this.advTree1.SelectedNode = node;
+                        return;
+                    }
+
+                    var wzNode = result.AsWzNode();
+                    if (wzNode != null && wzNode.Value is Wz_Image wzImg && wzImg.TryExtract(out _))
+                    {
+                        // find remaining path in wzImg
+                        wzNode = wzImg.Node;
+                        for (int i = resultPathLevel + 1; i < pathSegments.Length; i++)
+                        {
+                            string pathSegment = pathSegments[i];
+                            wzNode = wzNode.Nodes.FirstOrDefault(child => isNodePathMatches(pathSegment, child.Text, StringComparison.OrdinalIgnoreCase));
+                            if (wzNode == null)
+                            {
+                                break;
+                            }
+                        }
+                        if (wzNode != null && this.OnSelectedWzNode(wzNode))
+                        {
+                            return;
+                        }
+                    }
+                }
+            }
+
+            this.advTree1.SelectedNode = null;
+            MessageBoxEx.Show(this, "已经搜索到末尾。");
         }
 
         private IEnumerable<Node> findNextNode(AdvTree advTree)
@@ -2338,6 +2439,29 @@ namespace WzComparerR2
                     }
                 }
             }
+            else if (item is Wz_Png png)
+            {
+                SaveFileDialog dlg = new SaveFileDialog();
+                dlg.Title = "保存Canvas的原始数据";
+                dlg.FileName = advTree3.SelectedNode.Text + ".bin";
+                dlg.Filter = "*.*|*.*";
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        using (var dataReader = png.UnsafeOpenRead())
+                        using (var outputFile = dlg.OpenFile())
+                        {
+                            dataReader.CopyTo(outputFile);
+                        }
+                        this.labelItemStatus.Text = "保存成功。";
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBoxEx.Show("文件保存失败。\r\n" + ex.ToString(), "提示");
+                    }
+                }
+            }
         }
 
         private void tsmi2HandleUol_Click(object sender, EventArgs e)
@@ -2451,6 +2575,17 @@ namespace WzComparerR2
             {
                 historySelecting = true;
                 advTree3.SelectedNode = historyNodeList.MoveNext();
+            }
+        }
+
+        private void tsmi2CopyFullPath_Click(object sender, EventArgs e)
+        {
+            var selectedWzNode = advTree3.SelectedNode.AsWzNode();
+            if (selectedWzNode != null)
+            {
+                string fullPath = selectedWzNode.FullPathToFile.Replace('\\', '/');
+                Clipboard.SetText(fullPath);
+                ToastNotification.Show(this, "已经复制当前所选节点完整路径", 1000, eToastPosition.TopCenter);
             }
         }
 
@@ -3114,6 +3249,11 @@ namespace WzComparerR2
                 ConfigManager.Save();
                 UpdateWzLoadingSettings();
             }
+        }
+
+        private void colorPickerPicBoxBgColor_SelectedColorChanged(object sender, EventArgs e)
+        {
+            this.pictureBoxEx1.BackColor = ((ColorPickerDropDown)sender).SelectedColor;
         }
     }
 
