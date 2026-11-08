@@ -1,4 +1,4 @@
-﻿namespace WzComparerR2
+namespace WzComparerR2
 {
     partial class FrmGifSetting
     {
@@ -80,12 +80,16 @@
             this.textBoxX3 = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.labelX13 = new DevComponents.DotNetBar.LabelX();
             this.btnPreset = new DevComponents.DotNetBar.ButtonX();
-            this.btnNonTransparentMP4Preset = new DevComponents.DotNetBar.ButtonItem();
-            this.btnGreenBackdropMP4Preset = new DevComponents.DotNetBar.ButtonItem();
-            this.btnBlueBackdropMP4Preset = new DevComponents.DotNetBar.ButtonItem();
-            this.btnTransparentMOVPreset = new DevComponents.DotNetBar.ButtonItem();
-            this.btnTransparentWebMPreset = new DevComponents.DotNetBar.ButtonItem();
+            this.btnAPNGPreset = new DevComponents.DotNetBar.ButtonItem();
+            this.btnProResMOVPreset = new DevComponents.DotNetBar.ButtonItem();
+            this.btnQTRLEPreset = new DevComponents.DotNetBar.ButtonItem();
+            this.comboItemProRes = new DevComponents.Editors.ComboItem();
+            this.comboItemQTRLE = new DevComponents.Editors.ComboItem();
+            this.btnTransparentWebPPreset = new DevComponents.DotNetBar.ButtonItem();
+            this.btnWebM_VP9Preset = new DevComponents.DotNetBar.ButtonItem();
             this.btnDefaultPreset = new DevComponents.DotNetBar.ButtonItem();
+            this.comboItem8 = new DevComponents.Editors.ComboItem();
+            this.comboItem10 = new DevComponents.Editors.ComboItem();
             this.panelExMosaic.SuspendLayout();
             this.panelExColor.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.integerInput1)).BeginInit();
@@ -133,47 +137,47 @@
             this.btnPreset.TabIndex = 4;
             this.btnPreset.Text = "Preset";
             this.btnPreset.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
-            this.btnNonTransparentMP4Preset,
-            this.btnGreenBackdropMP4Preset,
-            this.btnBlueBackdropMP4Preset,
-            this.btnTransparentMOVPreset,
-            this.btnTransparentWebMPreset,
+            this.btnAPNGPreset,
+            this.btnTransparentWebPPreset,
+            this.btnWebM_VP9Preset,
+            this.btnProResMOVPreset,
+            this.btnQTRLEPreset,
             this.btnDefaultPreset});
             //
-            // btnNonTransparentMP4Preset
+            // btnAPNGPreset
             //
-            this.btnNonTransparentMP4Preset.Name = "btnNonTransparentMP4Preset";
-            this.btnNonTransparentMP4Preset.Text = "NonTransparentMP4";
-            this.btnNonTransparentMP4Preset.Click += new System.EventHandler(this.btnNonTransparentMP4Preset_Click);
+            this.btnAPNGPreset.Name = "btnAPNGPreset";
+            this.btnAPNGPreset.Text = "APNG";
+            this.btnAPNGPreset.Click += new System.EventHandler(this.btnAPNGPreset_Click);
             //
-            // btnGreenBackdropMP4Preset
+            // btnTransparentWebPPreset
             //
-            this.btnGreenBackdropMP4Preset.Name = "btnGreenBackdropMP4Preset";
-            this.btnGreenBackdropMP4Preset.Text = "GreenBackdropMP4";
-            this.btnGreenBackdropMP4Preset.Click += new System.EventHandler(this.btnGreenBackdropMP4Preset_Click);
+            this.btnTransparentWebPPreset.Name = "btnTransparentWebPPreset";
+            this.btnTransparentWebPPreset.Text = "WebP";
+            this.btnTransparentWebPPreset.Click += new System.EventHandler(this.btnTransparentWebPPreset_Click);
             //
-            // btnBlueBackdropMP4Preset
+            // btnWebM_VP9Preset
             //
-            this.btnBlueBackdropMP4Preset.Name = "btnBlueBackdropMP4Preset";
-            this.btnBlueBackdropMP4Preset.Text = "BlueBackdropMP4";
-            this.btnBlueBackdropMP4Preset.Click += new System.EventHandler(this.btnBlueBackdropMP4Preset_Click);
+            this.btnWebM_VP9Preset.Name = "btnWebM_VP9Preset";
+            this.btnWebM_VP9Preset.Text = "WebM (VP9)";
+            this.btnWebM_VP9Preset.Click += new System.EventHandler(this.btnWebM_VP9Preset_Click);
             //
-            // btnTransparentMOVPreset
+            // btnProResMOVPreset
             //
-            this.btnTransparentMOVPreset.Name = "btnTransparentMOVPreset";
-            this.btnTransparentMOVPreset.Text = "TransparentMOV";
-            this.btnTransparentMOVPreset.Click += new System.EventHandler(this.btnTransparentMOVPreset_Click);
-            //
-            // btnTransparentWebMPreset
-            //
-            this.btnTransparentWebMPreset.Name = "btnTransparentWebMPreset";
-            this.btnTransparentWebMPreset.Text = "TransparentWebM";
-            this.btnTransparentWebMPreset.Click += new System.EventHandler(this.btnTransparentWebMPreset_Click);
+            this.btnProResMOVPreset.Name = "btnProResMOVPreset";
+            this.btnProResMOVPreset.Text = "ProRes 4444 (.mov)";
+            this.btnProResMOVPreset.Click += new System.EventHandler(this.btnProResMOVPreset_Click);
+            // 
+            // btnQTRLEPreset
+            // 
+            this.btnQTRLEPreset.Name = "btnQTRLEPreset";
+            this.btnQTRLEPreset.Text = "QuickTime RLE (.mov)";
+            this.btnQTRLEPreset.Click += new System.EventHandler(this.btnQTRLEPreset_Click);
             //
             // btnDefaultPreset
             //
             this.btnDefaultPreset.Name = "btnDefaultPreset";
-            this.btnDefaultPreset.Text = "Default";
+            this.btnDefaultPreset.Text = "Default (APNG)";
             this.btnDefaultPreset.Click += new System.EventHandler(this.btnDefaultPreset_Click);
             // 
             // checkBoxX1
@@ -212,9 +216,11 @@
             this.comboBoxEx1.FormattingEnabled = true;
             this.comboBoxEx1.ItemHeight = 15;
             this.comboBoxEx1.Items.AddRange(new object[] {
-            this.comboItem1,
-            this.comboItem2,
             this.comboItem6,
+            this.comboItem8,
+            this.comboItem10,
+            this.comboItemProRes,
+            this.comboItemQTRLE,
             this.comboItem7});
             this.comboBoxEx1.Location = new System.Drawing.Point(80, 178);
             this.comboBoxEx1.Name = "comboBoxEx1";
@@ -232,11 +238,27 @@
             // 
             // comboItem6
             // 
-            this.comboItem6.Text = "Apng Encoder";
+            this.comboItem6.Text = "APNG (.apng)";
+            // 
+            // comboItem8
+            // 
+            this.comboItem8.Text = "WebP (.webp)";
+            // 
+            // comboItem10
+            // 
+            this.comboItem10.Text = "WebM VP9 (.webm)";
+            // 
+            // comboItemProRes
+            // 
+            this.comboItemProRes.Text = "ProRes 4444 (.mov)";
+            // 
+            // comboItemQTRLE
+            // 
+            this.comboItemQTRLE.Text = "QuickTime RLE (.mov)";
             // 
             // comboItem7
             // 
-            this.comboItem7.Text = "FFmpeg Encoder";
+            this.comboItem7.Text = "FFmpeg Custom";
             // 
             // labelX3
             // 
@@ -914,11 +936,15 @@
         private DevComponents.DotNetBar.Controls.TextBoxX textBoxX3;
         private DevComponents.DotNetBar.LabelX labelX13;
         private DevComponents.DotNetBar.ButtonX btnPreset;
-        private DevComponents.DotNetBar.ButtonItem btnNonTransparentMP4Preset;
-        private DevComponents.DotNetBar.ButtonItem btnGreenBackdropMP4Preset;
-        private DevComponents.DotNetBar.ButtonItem btnBlueBackdropMP4Preset;
-        private DevComponents.DotNetBar.ButtonItem btnTransparentMOVPreset;
-        private DevComponents.DotNetBar.ButtonItem btnTransparentWebMPreset;
+        private DevComponents.DotNetBar.ButtonItem btnAPNGPreset;
+        private DevComponents.DotNetBar.ButtonItem btnProResMOVPreset;
+        private DevComponents.DotNetBar.ButtonItem btnQTRLEPreset;
+        private DevComponents.Editors.ComboItem comboItemProRes;
+        private DevComponents.Editors.ComboItem comboItemQTRLE;
+        private DevComponents.DotNetBar.ButtonItem btnTransparentWebPPreset;
+        private DevComponents.DotNetBar.ButtonItem btnWebM_VP9Preset;
         private DevComponents.DotNetBar.ButtonItem btnDefaultPreset;
+        private DevComponents.Editors.ComboItem comboItem8;
+        private DevComponents.Editors.ComboItem comboItem10;
     }
 }

@@ -382,7 +382,14 @@ namespace WzComparerR2
             {
                 default:
                 case ImageBackgroundType.Transparent:
-                    rec.BackgroundColor = Color.Transparent;
+                    if (cap.AlphaSupportMode == AlphaSupportMode.NoAlpha)
+                    {
+                        rec.BackgroundColor = System.Drawing.Color.FromArgb(255, config.BackgroundColor.Value).ToXnaColor();
+                    }
+                    else
+                    {
+                        rec.BackgroundColor = Color.Transparent;
+                    }
                     break;
 
                 case ImageBackgroundType.Color:
@@ -483,7 +490,7 @@ namespace WzComparerR2
             async Task<int> ApplyFrame(byte[] frameData, int frameDelay)
             {
                 byte[] gifData = null;
-                if (cap.AlphaSupportMode != AlphaSupportMode.FullAlpha && config.BackgroundType.Value == ImageBackgroundType.Transparent)
+                if (cap.AlphaSupportMode == AlphaSupportMode.OneBitAlpha && config.BackgroundType.Value == ImageBackgroundType.Transparent)
                 {
                     using (var rt2 = rec.GetGifTexture(config.BackgroundColor.Value.ToXnaColor(), config.MinMixedAlpha))
                     {

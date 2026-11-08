@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -16,11 +16,11 @@ namespace WzComparerR2.Encoders
     {
         public static readonly string DefaultExecutionFileName = "ffmpeg";
         /// <summary>
-        /// Default ffmpeg argument format to encode mp4 with avc H.264 video format.
+        /// Default ffmpeg argument format to encode QuickTime Animation RLE video format.
         /// </summary>
-        public static readonly string DefaultArgumentFormat = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -vf ""crop=trunc(iw/2)*2:trunc(ih/2)*2"" -vcodec libx264 -pix_fmt yuv420p ""%o""";
+        public static readonly string DefaultArgumentFormat = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -c:v qtrle -pix_fmt argb ""%o""";
 
-        public static readonly string DefaultOutputFileExtension = ".mp4";
+        public static readonly string DefaultOutputFileExtension = ".mov";
 
         public FFmpegEncoder()
         {
@@ -43,7 +43,7 @@ namespace WzComparerR2.Encoders
             MinFrameDelay = 1,
             MaxFrameDelay = int.MaxValue,
             FrameDelayStep = 1,
-            AlphaSupportMode = AlphaSupportMode.NoAlpha,
+            AlphaSupportMode = AlphaSupportMode.FullAlpha,
             DefaultExtension = string.IsNullOrEmpty(OutputFileExtension) ? DefaultOutputFileExtension : OutputFileExtension,
             SupportedExtensions = new[] { ".*" },
         };
@@ -72,7 +72,7 @@ namespace WzComparerR2.Encoders
             // start ffmpeg
             ProcessStartInfo psi = new()
             {
-                FileName = string.IsNullOrEmpty(FFmpegBinPath) ? DefaultExecutionFileName : FFmpegBinPath,
+                FileName = ResolveFFmpegBinPath(),
                 Arguments = SubstituteParams(string.IsNullOrEmpty(FFmpegArgumentFormat) ? DefaultArgumentFormat : FFmpegArgumentFormat,
                     @$"\\.\pipe\{pipeName}", Width, Height, delay, FileName),
                 WorkingDirectory = Environment.CurrentDirectory,
@@ -167,6 +167,52 @@ namespace WzComparerR2.Encoders
                 "%%" => "%",
                 _ => throw new FormatException($"Unknown format: {match.Value}")
             });
+        }
+
+        private string ResolveFFmpegBinPath()
+        {
+            if (!string.IsNullOrEmpty(FFmpegBinPath) && File.Exists(FFmpegBinPath))
+            {
+                return FFmpegBinPath;
+            }
+
+            if (!string.IsNullOrEmpty(FFmpegBinPath))
+            {
+                return FFmpegBinPath;
+            }
+
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            if (!string.IsNullOrEmpty(baseDir))
+            {
+                string p1 = Path.Combine(baseDir, "ffmpeg.exe");
+                if (File.Exists(p1)) return p1;
+                string p2 = Path.Combine(baseDir, "Lib", "ffmpeg.exe");
+                if (File.Exists(p2)) return p2;
+                string p3 = Path.Combine(baseDir, "Lib", "x64", "ffmpeg.exe");
+                if (File.Exists(p3)) return p3;
+            }
+
+            try
+            {
+                string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (!string.IsNullOrEmpty(localAppData))
+                {
+                    string wingetDir = Path.Combine(localAppData, "Microsoft", "WinGet", "Packages");
+                    if (Directory.Exists(wingetDir))
+                    {
+                        var files = Directory.GetFiles(wingetDir, "ffmpeg.exe", SearchOption.AllDirectories);
+                        if (files.Length > 0)
+                        {
+                            return files[0];
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return DefaultExecutionFileName;
         }
     }
 }

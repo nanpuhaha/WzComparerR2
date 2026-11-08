@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WzComparerR2.Config;
 using WzComparerR2.Encoders;
@@ -17,23 +17,9 @@ namespace WzComparerR2
 
         private static void RegisterEncoders()
         {
-            registeredEncoders.Add(0, new AnimateEncoderProvider<BuildInGifEncoder>
+            registeredEncoders.Add(0, new AnimateEncoderProvider<BuildInApngEncoder>
             {
                 ID = 0,
-                Name = nameof(BuildInGifEncoder),
-                CreateEncoderCallback = () => new BuildInGifEncoder(),
-            });
-
-            registeredEncoders.Add(1, new AnimateEncoderProvider<IndexGifEncoder>
-            {
-                ID = 1,
-                Name = nameof(IndexGifEncoder),
-                CreateEncoderCallback = () => new IndexGifEncoder(),
-            });
-
-            registeredEncoders.Add(2, new AnimateEncoderProvider<BuildInApngEncoder>
-            {
-                ID = 2,
                 Name = nameof(BuildInApngEncoder),
                 CreateEncoderCallback = () => new BuildInApngEncoder(),
                 ConfigureEncoderCallback = (encoder, config) =>
@@ -42,9 +28,53 @@ namespace WzComparerR2
                 }
             });
 
-            registeredEncoders.Add(3, new AnimateEncoderProvider<FFmpegEncoder>
+            registeredEncoders.Add(1, new AnimateEncoderProvider<WebpEncoder>
+            {
+                ID = 1,
+                Name = nameof(WebpEncoder),
+                CreateEncoderCallback = () => new WebpEncoder(),
+                ConfigureEncoderCallback = (encoder, config) =>
+                {
+                    encoder.FFmpegBinPath = config.FFmpegBinPath;
+                }
+            });
+
+            registeredEncoders.Add(2, new AnimateEncoderProvider<WebmVP9Encoder>
+            {
+                ID = 2,
+                Name = nameof(WebmVP9Encoder),
+                CreateEncoderCallback = () => new WebmVP9Encoder(),
+                ConfigureEncoderCallback = (encoder, config) =>
+                {
+                    encoder.FFmpegBinPath = config.FFmpegBinPath;
+                }
+            });
+
+            registeredEncoders.Add(3, new AnimateEncoderProvider<MovProResEncoder>
             {
                 ID = 3,
+                Name = nameof(MovProResEncoder),
+                CreateEncoderCallback = () => new MovProResEncoder(),
+                ConfigureEncoderCallback = (encoder, config) =>
+                {
+                    encoder.FFmpegBinPath = config.FFmpegBinPath;
+                }
+            });
+
+            registeredEncoders.Add(4, new AnimateEncoderProvider<MovQTRLEEncoder>
+            {
+                ID = 4,
+                Name = nameof(MovQTRLEEncoder),
+                CreateEncoderCallback = () => new MovQTRLEEncoder(),
+                ConfigureEncoderCallback = (encoder, config) =>
+                {
+                    encoder.FFmpegBinPath = config.FFmpegBinPath;
+                }
+            });
+
+            registeredEncoders.Add(5, new AnimateEncoderProvider<FFmpegEncoder>
+            {
+                ID = 5,
                 Name = nameof(FFmpegEncoder),
                 CreateEncoderCallback = () => new FFmpegEncoder(),
                 ConfigureEncoderCallback = (encoder, config) =>
@@ -65,7 +95,10 @@ namespace WzComparerR2
         {
             if (!registeredEncoders.TryGetValue(id, out var provider))
             {
-                throw new Exception($"Encoder ID {id} has not registered");
+                if (!registeredEncoders.TryGetValue(0, out provider))
+                {
+                    throw new Exception($"Encoder ID {id} has not registered");
+                }
             }
 
             var encoder = provider.CreateEncoder();

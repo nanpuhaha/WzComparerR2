@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Configuration;
 using System.Drawing;
+using WzComparerR2.Encoders;
 
 namespace WzComparerR2.Config
 {
@@ -16,6 +17,8 @@ namespace WzComparerR2.Config
             BackgroundType = ImageBackgroundType.Transparent;
             MinMixedAlpha = 0;
             MinDelay = 30;
+            FFmpegArgument = MovQTRLEEncoder.DefaultArgumentFormat;
+            FFmpegOutputFileExtension = MovQTRLEEncoder.DefaultOutputFileExtension;
         }
 
         [ConfigurationProperty("autoSavePictureFolder")]
